@@ -30,7 +30,7 @@ class ApiFeatures{
 	fieldLimit(){
 		if(this.queryStr.fields){
 			const selectBy = this.queryStr.fields.split(",").join(" ");
-			this.query = this.query.selecct(selectBy);
+			this.query = this.query.select(selectBy);
 		}else{
 			this.query = this.query.select("-__v");
 		}
