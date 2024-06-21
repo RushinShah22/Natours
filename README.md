@@ -98,7 +98,6 @@ natours/
 ├── public/            # Static files (CSS, JS, images)
 ├── routes/            # Express routes
 ├── views/             # Pug templates
-├── .env               # Environment variables
 ├── app.js             # Express application
 ├── server.js          # Server entry point
 ├── package.json       # Project dependencies and scripts
