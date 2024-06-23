@@ -8,6 +8,7 @@ exports.getAllTours = catchAsyncError(async (req, res, next) => {
 	
 		const features = new ApiFeatures(Tour, req.query);
 		// const features = Tour.find();
+		
 		const tours = await features.filter().sort().fieldLimit().paginate().query;
 
 		res.status(200).json({

@@ -19,7 +19,9 @@ app.all("*", (req, res, next) => {
 	next((new AppError(`can't find ${req.originalUrl} on this server.`, 404, "fail")));
 })
 
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
+
+
 
 module.exports = app;
 

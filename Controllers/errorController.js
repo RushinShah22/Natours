@@ -13,7 +13,7 @@ const sendDevError = (res, err) => {
 const sendProdError = (res, err) => {
 	res.status(err.statusCode).json({
 		status: err.status,
-		message: err.message
+		message: err.statusCode === 500 ? "Something Went Wrong." : err.message
 	});
 }
 
