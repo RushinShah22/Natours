@@ -36,13 +36,3 @@ exports.deleteAUser = (req, res) => {
     res.status(200).json(user);
   });
 };
-
-exports.signup = catchAsyncError(async (req, res) => {
-  const newUser = await UserModel.create(req.body);
-  res.status(201).json({
-    status: 'success',
-    data: {
-      user: newUser,
-    },
-  });
-});
