@@ -1,5 +1,6 @@
 const UserModel = require('./../Model/userModel');
 const catchAsyncError = require('./../utils/catchAsyncError');
+const AppError = require('./../utils/appError');
 const jwt = require('jsonwebtoken');
 
 const createToken = (id) => {
@@ -16,6 +17,31 @@ exports.signup = catchAsyncError(async (req, res) => {
     data: {
       user: newUser,
       token,
+    },
+  });
+});
+
+exports.login = catchAsyncError(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password', 400));
+  }
+
+  const user = await UserModel.findOne({ email }).select('+password');
+
+  if (!user) {
+    return next(new AppError('Incorrect email.', 401));
+  }
+
+  if (!(await user.correctPassword(password, user.password))) {
+    return next(new AppError('Incorrect Password.', 401));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      token: createToken(user._id),
     },
   });
 });
