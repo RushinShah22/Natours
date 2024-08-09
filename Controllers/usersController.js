@@ -1,6 +1,7 @@
 const fs = require('fs');
 const catchAsyncError = require('../utils/catchAsyncError');
 const UserModel = require('./../Model/userModel');
+const AppError = require('../utils/appError');
 
 exports.checkID = (req, res, next, val) => {
   fs.readFile(`${__dirname}/../dev-data/data/users.json`, (err, data) => {
@@ -36,3 +37,42 @@ exports.deleteAUser = (req, res) => {
     res.status(200).json(user);
   });
 };
+
+exports.updateUser = catchAsyncError(async (req, res, next) => {
+  const filterProps = ['name', 'email'];
+  const updatedUserData = {};
+
+  if (req.body.password || req.body.confirmPassword) {
+    return next(
+      new AppError(
+        'This route is not for password updates. Please use /changePassword',
+        400
+      )
+    );
+  }
+
+  for (x of filterProps) {
+    if (req.body[x]) {
+      updatedUserData[x] = req.body[x];
+    }
+  }
+  const user = await UserModel.findByIdAndUpdate(
+    req.params.id,
+    updatedUserData,
+    {
+      runValidators: true,
+      new: true,
+    }
+  );
+
+  if (!user) {
+    return next(new AppError('No user found with that ID', 400));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+});

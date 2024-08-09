@@ -12,6 +12,8 @@ const createToken = (id) => {
   });
 };
 
+exports.createToken = createToken;
+
 exports.signup = catchAsyncError(async (req, res) => {
   const newUser = await UserModel.create(req.body);
   const token = createToken(newUser._id);
@@ -115,6 +117,24 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
     status: 'success',
     message: 'Password successfully changed.',
     token: createToken(user._id),
+  });
+});
+
+exports.updatePassword = catchAsyncError(async (req, res, next) => {
+  const user = await UserModel.findById(req.params.id);
+
+  if (!user) {
+    return next(new AppError('User Not Found.', 404));
+  }
+
+  user.password = req.body.passwordl;
+  user.confirmPassword = req.body.confirmPassword;
+  await user.save();
+
+  res.status(201).json({
+    status: 'success',
+    message: 'User Updated successfully.',
+    token: authController.createToken(user._id),
   });
 });
 
