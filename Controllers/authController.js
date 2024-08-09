@@ -1,6 +1,7 @@
 const UserModel = require('./../Model/userModel');
 const catchAsyncError = require('./../utils/catchAsyncError');
 const AppError = require('./../utils/appError');
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 
 const createToken = (id) => {
@@ -45,3 +46,55 @@ exports.login = catchAsyncError(async (req, res, next) => {
     },
   });
 });
+
+exports.forgotpassword = catchAsyncError(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    return next(new AppError('There is no user with email address.', 404));
+  }
+  const resetToken = user.createResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
+});
+
+exports.protect = catchAsyncError(async (req, res, next) => {
+  if (
+    !req.headers.authorization ||
+    !req.headers.authorization.startsWith('Bearer')
+  ) {
+    return next(
+      new AppError('You are not logged in. Please log in to get access.', 401)
+    );
+  }
+
+  const token = req.headers.authorization.split(' ')[1];
+  if (!token) {
+    return next(
+      new AppError('You are not logged in. Please log in to get access.', 401)
+    );
+  }
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  const currentUser = await UserModel.findById(decoded.id);
+
+  if (!currentUser) {
+    return next(new AppError('User no longer exists.', 401));
+  }
+
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError('User recently changed password. Please log in again.', 401)
+    );
+  }
+  req.user = currentUser;
+
+  next();
+});
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError('You cannot access this route.', 403));
+    }
+    next();
+  };
+};
