@@ -45,12 +45,17 @@ const UserSchema = new mongoose.Schema({
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetTokenExpires: Date,
 });
 
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
   this.confirmPassword = undefined;
+  if (!this.isNew) {
+    this.passwordChangedAt = Date.now() - 1000;
+  }
   next();
 });
 
