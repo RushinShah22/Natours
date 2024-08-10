@@ -12,8 +12,6 @@ const createToken = (id) => {
   });
 };
 
-exports.createToken = createToken;
-
 exports.signup = catchAsyncError(async (req, res) => {
   const newUser = await UserModel.create({
     name: req.body.name,
@@ -22,12 +20,16 @@ exports.signup = catchAsyncError(async (req, res) => {
     confirmPassword: req.body.confirmPassword,
     photo: req.body.photo,
   });
+  newUser.password = undefined;
   const token = createToken(newUser._id);
+  res.cookie('jwt', token, {
+    maxAge: 90 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
   res.status(201).json({
     status: 'success',
     data: {
       user: newUser,
-      token,
     },
   });
 });
@@ -48,12 +50,15 @@ exports.login = catchAsyncError(async (req, res, next) => {
   if (!(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect Password.', 401));
   }
+  const token = createToken(user._id);
+  res.cookie('jwt', token, {
+    maxAge: 90 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
 
   res.status(200).json({
     status: 'success',
-    data: {
-      token: createToken(user._id),
-    },
+    message: 'User Logged in Successfully.',
   });
 });
 
@@ -64,8 +69,7 @@ exports.forgotpassword = catchAsyncError(async (req, res, next) => {
     return next(new AppError('There is no user with email address.', 404));
   }
   const resetToken = user.createResetPasswordToken();
-  user.resetPasswordToken = resetToken;
-  user.resetPasswordTokenExpires = Date.now() + 10 * 60 * 1000;
+
   await user.save({ validateBeforeSave: false });
 
   const resetURL = `${req.protocol}://${req.get(
@@ -87,8 +91,8 @@ exports.forgotpassword = catchAsyncError(async (req, res, next) => {
       message: 'Token sent to email!',
     });
   } catch (err) {
-    user.resetPasswordToken = undefined;
-    user.resetPasswordTokenExpires = undefined;
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpires = undefined;
     await user.save({ validateBeforeSave: false });
     next(
       new AppError(
@@ -119,42 +123,56 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
 
   await user.save();
 
+  res.cookie('jwt', createToken(user._id), {
+    maxAge: 90 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
+
   res.status(201).json({
     status: 'success',
     message: 'Password successfully changed.',
-    token: createToken(user._id),
   });
 });
 
 exports.updatePassword = catchAsyncError(async (req, res, next) => {
+  if (String(req.user._id) !== req.params.id) {
+    return next(
+      new AppError('You are not authorized to perform this action.', 403)
+    );
+  }
   const user = await UserModel.findById(req.params.id);
 
   if (!user) {
     return next(new AppError('User Not Found.', 404));
   }
 
-  user.password = req.body.passwordl;
+  user.password = req.body.password;
   user.confirmPassword = req.body.confirmPassword;
   await user.save();
+
+  const token = createToken(user._id);
+  res.cookie('jwt', token, {
+    maxAge: 90 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
 
   res.status(201).json({
     status: 'success',
     message: 'User Updated successfully.',
-    token: authController.createToken(user._id),
+    data: {
+      user,
+    },
   });
 });
 
 exports.protect = catchAsyncError(async (req, res, next) => {
-  if (
-    !req.headers.authorization ||
-    !req.headers.authorization.startsWith('Bearer')
-  ) {
+  if (!req.cookies.jwt) {
     return next(
       new AppError('You are not logged in. Please log in to get access.', 401)
     );
   }
 
-  const token = req.headers.authorization.split(' ')[1];
+  const token = req.cookies.jwt;
   if (!token) {
     return next(
       new AppError('You are not logged in. Please log in to get access.', 401)

@@ -33,7 +33,7 @@ module.exports = (err, req, res, next) => {
   // Duplicate values error
   if (err.code === 11000) {
     error = new AppError(
-      `A tour with '${Object.keys(err.keyValue)[0]} : ${
+      `An item with '${Object.keys(err.keyValue)[0]} : ${
         Object.values(err.keyValue)[0]
       }' already exists!!!`,
       400,

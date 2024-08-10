@@ -1,18 +1,6 @@
-const fs = require('fs');
 const catchAsyncError = require('../utils/catchAsyncError');
 const UserModel = require('./../Model/userModel');
 const AppError = require('../utils/appError');
-
-exports.checkID = (req, res, next, val) => {
-  fs.readFile(`${__dirname}/../dev-data/data/users.json`, (err, data) => {
-    data = JSON.parse(data);
-    const user = data.find((user) => val === user.id);
-    if (!user) {
-      return res.send('NO USER FOUND');
-    }
-    next();
-  });
-};
 
 exports.getAllUsers = catchAsyncError(async (req, res) => {
   const users = await UserModel.find({});
@@ -37,6 +25,11 @@ exports.getUser = catchAsyncError(async (req, res) => {
 });
 
 exports.deleteUser = catchAsyncError(async (req, res) => {
+  if (String(req.user._id) !== req.params.id) {
+    return next(
+      new AppError('You are not authorized to perform this action.', 403)
+    );
+  }
   await UserModel.findByIdAndUpdate(
     req.user._id,
     { active: false },
@@ -49,6 +42,12 @@ exports.deleteUser = catchAsyncError(async (req, res) => {
 });
 
 exports.updateUser = catchAsyncError(async (req, res, next) => {
+  if (String(req.user._id) !== req.params.id) {
+    console.log(req.user._id, req.params.id);
+    return next(
+      new AppError('You are not authorized to perform this action.', 403)
+    );
+  }
   const filterProps = ['name', 'email'];
   const updatedUserData = {};
 

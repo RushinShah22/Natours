@@ -9,7 +9,7 @@ const expressMongoSanitize = require('express-mongo-sanitize');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const hpp = require('hpp');
-
+const cookieParser = require('cookie-parser');
 const app = express();
 
 app.use(
@@ -23,6 +23,7 @@ app.use(
 app.use(expressMongoSanitize());
 app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
 
 app.use(xss());
 app.use(
