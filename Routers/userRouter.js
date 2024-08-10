@@ -8,8 +8,8 @@ router.param('id', authController.protect);
 router.route('/').get(userController.getAllUsers);
 router
   .route('/:id')
-  .get(userController.getAUser)
-  .delete(userController.deleteAUser)
+  .get(userController.getUser)
+  .delete(userController.deleteUser)
   .patch(userController.updateUser);
 router.route('/signup').post(authController.signup);
 router.route('/login').post(authController.login);

@@ -47,6 +47,11 @@ const UserSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetTokenExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 UserSchema.pre('save', async function (next) {
@@ -57,6 +62,10 @@ UserSchema.pre('save', async function (next) {
     this.passwordChangedAt = Date.now() - 1000;
   }
   next();
+});
+
+UserSchema.pre(/^find/, function () {
+  this.find({ active: { $ne: false } });
 });
 
 UserSchema.methods.correctPassword = async function (

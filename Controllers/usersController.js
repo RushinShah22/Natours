@@ -14,29 +14,39 @@ exports.checkID = (req, res, next, val) => {
   });
 };
 
-exports.getAllUsers = (req, res) => {
-  fs.readFile(`${__dirname}/../dev-data/data/users.json`, (err, data) => {
-    res.status(200).json(Object.assign({ message: 'ok' }, data));
-  });
-};
+exports.getAllUsers = catchAsyncError(async (req, res) => {
+  const users = await UserModel.find({});
 
-exports.getAUser = (req, res) => {
-  fs.readFile(`${__dirname}/../dev-data/users.json`, (err, data) => {
-    data = JSON.parse(data);
-    const id = req.params(id) * 1;
-    const user = data.find((val) => val.id === id);
-    res.status(200).json(user);
+  res.status(200).json({
+    status: 'success',
+    data: {
+      numOfUsers: users.length,
+      users,
+    },
   });
-};
+});
 
-exports.deleteAUser = (req, res) => {
-  fs.readFile(`${__dirname}/../dev-data/users.json`, (err, data) => {
-    data = JSON.parse(data);
-    const id = req.params(id) * 1;
-    const user = data.find((val) => val.id === id);
-    res.status(200).json(user);
+exports.getUser = catchAsyncError(async (req, res) => {
+  const user = await UserModel.findById(req.params.id);
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
   });
-};
+});
+
+exports.deleteUser = catchAsyncError(async (req, res) => {
+  await UserModel.findByIdAndUpdate(
+    req.user._id,
+    { active: false },
+    { new: true, runValidators: true }
+  );
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
 
 exports.updateUser = catchAsyncError(async (req, res, next) => {
   const filterProps = ['name', 'email'];
@@ -64,10 +74,6 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
       new: true,
     }
   );
-
-  if (!user) {
-    return next(new AppError('No user found with that ID', 400));
-  }
 
   res.status(200).json({
     status: 'success',

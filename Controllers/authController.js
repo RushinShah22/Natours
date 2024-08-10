@@ -15,7 +15,13 @@ const createToken = (id) => {
 exports.createToken = createToken;
 
 exports.signup = catchAsyncError(async (req, res) => {
-  const newUser = await UserModel.create(req.body);
+  const newUser = await UserModel.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+    photo: req.body.photo,
+  });
   const token = createToken(newUser._id);
   res.status(201).json({
     status: 'success',
