@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  natours:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: natours
+    ports:
+      - 80:80
+    

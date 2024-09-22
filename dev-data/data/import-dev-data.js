@@ -19,7 +19,7 @@ async function connectDB() {
     });
 }
 
-const data = fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8');
+const data = fs.readFileSync(`${__dirname}/tours.json`, 'utf-8');
 
 async function importData() {
   try {

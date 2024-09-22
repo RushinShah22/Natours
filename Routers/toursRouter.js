@@ -4,6 +4,7 @@ const authController = require('./../Controllers/authController');
 const router = express.Router();
 
 // router.param("id", toursController.checkID);
+
 router
   .route('/')
   .get(authController.protect, toursController.getAllTours)
