@@ -4,7 +4,7 @@ services:
   natours:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: server.dockerfile
     container_name: natours
     environment:
       - DATABASE=mongodb://db:27017/natours
@@ -17,6 +17,8 @@ services:
   db:
     container_name: mongodb
     image: mongo
+    volumes:
+      - ./db-data:/data/db
     ports:
       - 27017:27017
     
