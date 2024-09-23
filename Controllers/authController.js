@@ -18,7 +18,7 @@ exports.signup = catchAsyncError(async (req, res) => {
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
-    photo: req.body.photo,
+    photo: req.body.photo
   });
   newUser.password = undefined;
   const token = createToken(newUser._id);

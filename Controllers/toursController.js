@@ -1,84 +1,16 @@
-const AppError = require("../utils/appError");
 const Tour = require("./../Model/tourModel");
-const ApiFeatures = require("./../utils/apiFeatures");
 const catchAsyncError = require("./../utils/catchAsyncError");
+const {deleteOne, updateOne, getAll, createOne, getOne} = require("./handlerFactory")
 
 
-exports.getAllTours = catchAsyncError(async (req, res, next) => {
-	
-		const features = new ApiFeatures(Tour, req.query);
-		// const features = Tour.find();
-		
-		const tours = await features.filter().sort().fieldLimit().paginate().query;
 
-		res.status(200).json({
-			status: "success",
-			numberOfTour: tours.length,
-			data: {
-				tours
-			}
-		});
+exports.deleteTour = deleteOne(Tour);
+exports.patchTour = updateOne(Tour);
+exports.getAllTours = getAll(Tour);
+exports.getATour = getOne(Tour, {path: "reviews"});
+exports.createTour = createOne(Tour);
 
-});
 
-exports.getATour = catchAsyncError( async (req, res, next) =>{
-	
-		const tour = await Tour.findById(req.params.id).populate('reviews');
-		if(!tour)throw new AppError(`Can't find Tour with ID: ${req.params.id}`, 404, "fail");
-
-		res.status(200).json({
-			status: "success",
-			tour
-		});
-	
-});
-
-exports.createTour = catchAsyncError(async (req, res, next) => {
-	
-		const tour = await Tour.create(req.body);
-
-		res.status(201).json({
-			status: "success",
-			data:{
-				tour
-			}
-		})
-	
-});
-
-exports.patchTour = catchAsyncError(async (req, res, next) => {
-
-	
-		const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-			runValidators: true,
-			new: true
-		})
-
-		if(!tour)throw new AppError(`Can't find Tour with ID: ${req.params.id}`, 404, "fail");
-
-		res.send(201).json({
-			status: "success",
-			data:{
-				tour
-			}
-		})
-	
-});
-
-exports.deleteTour = catchAsyncError(async (req, res, next) => {
-	
-		const tour = await Tour.findByIdAndDelete(req.params.id);
-
-		if(!tour)throw new AppError(`Can't find Tour with ID: ${req.params.id}`, 404, "fail");
-		
-		res.status(200).json({
-			status: "success",
-			data:{
-				tour
-			}
-		})
-	
-});
 
 exports.tourStats = catchAsyncError(async (req, res, next) => {
 	

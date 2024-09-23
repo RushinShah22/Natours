@@ -1,28 +1,10 @@
 const catchAsyncError = require('../utils/catchAsyncError');
-const UserModel = require('./../Model/userModel');
+const User = require('./../Model/userModel');
 const AppError = require('../utils/appError');
+const {getAll, getOne} = require("./handlerFactory");
 
-exports.getAllUsers = catchAsyncError(async (req, res) => {
-  const users = await UserModel.find({});
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      numOfUsers: users.length,
-      users,
-    },
-  });
-});
-
-exports.getUser = catchAsyncError(async (req, res) => {
-  const user = await UserModel.findById(req.params.id);
-  res.status(200).json({
-    status: 'success',
-    data: {
-      user,
-    },
-  });
-});
+exports.getAllUsers = getAll(User);
+exports.getUser = getOne(User);
 
 exports.deleteUser = catchAsyncError(async (req, res) => {
   if (String(req.user._id) !== req.params.id) {
@@ -30,7 +12,7 @@ exports.deleteUser = catchAsyncError(async (req, res) => {
       new AppError('You are not authorized to perform this action.', 403)
     );
   }
-  await UserModel.findByIdAndUpdate(
+  await User.findByIdAndUpdate(
     req.user._id,
     { active: false },
     { new: true, runValidators: true }
@@ -65,7 +47,7 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
       updatedUserData[x] = req.body[x];
     }
   }
-  const user = await UserModel.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.params.id,
     updatedUserData,
     {
