@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const tourRouter = require('./Routers/toursRouter');
+const reviewRouter = require('./Routers/reviewRouter');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./Controllers/errorController');
 const userRouter = require('./Routers/userRouter');
@@ -37,6 +38,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
   next(

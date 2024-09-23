@@ -99,6 +99,9 @@ const tourSchema = new mongoose.Schema({
       ref: 'User',
     },
   ],
+}, {
+  toJSON: {virtuals: true},
+  toObject: {virtuals: true}
 });
 
 tourSchema.pre(/^find/, function (next) {
@@ -109,6 +112,12 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
-const Tour = new mongoose.model('Tour', tourSchema);
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id"
+})
+
+const Tour = mongoose.model('Tour', tourSchema);
 
 module.exports = Tour;
