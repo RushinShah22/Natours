@@ -20,7 +20,7 @@ module.exports.deleteOne = Model => catchAsyncError(async (req, res, next) => {
 
 module.exports.updateOne = Model => catchAsyncError(async (req, res, next) => {
 
-	
+
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
         runValidators: true,
         new: true
@@ -28,7 +28,7 @@ module.exports.updateOne = Model => catchAsyncError(async (req, res, next) => {
 
     if(!doc)throw new AppError(`Can't find document with ID: ${req.params.id}`, 404, "fail");
 
-    res.send(201).json({
+    res.status(201).json({
         status: "success",
         data:{
             data: doc

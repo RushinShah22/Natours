@@ -1,4 +1,4 @@
-const UserModel = require('./../Model/userModel');
+const User = require("./../Model/userModel");
 const catchAsyncError = require('./../utils/catchAsyncError');
 const AppError = require('./../utils/appError');
 const { promisify } = require('util');
@@ -13,7 +13,7 @@ const createToken = (id) => {
 };
 
 exports.signup = catchAsyncError(async (req, res) => {
-  const newUser = await UserModel.create({
+  const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
@@ -41,7 +41,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
     return next(new AppError('Please provide email and password', 400));
   }
 
-  const user = await UserModel.findOne({ email }).select('+password');
+  const user = await User.findOne({ email }).select('+password');
 
   if (!user) {
     return next(new AppError('Incorrect email.', 401));
@@ -59,12 +59,17 @@ exports.login = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     message: 'User Logged in Successfully.',
+    data: {
+      name: user.name,
+      email: user.email,
+      _id: user._id
+    }
   });
 });
 
 exports.forgotpassword = catchAsyncError(async (req, res, next) => {
   const { email } = req.body;
-  const user = await UserModel.findOne({ email });
+  const user = await User.findOne({ email });
   if (!user) {
     return next(new AppError('There is no user with email address.', 404));
   }
@@ -107,7 +112,7 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
   let { token } = req.params;
   token = crypto.createHash('sha256').update(token).digest('hex');
 
-  const user = await UserModel.findOne({
+  const user = await User.findOne({
     passwordResetToken: token,
     passwordResetTokenExpires: { $gt: Date.now() },
   });
@@ -140,7 +145,7 @@ exports.updatePassword = catchAsyncError(async (req, res, next) => {
       new AppError('You are not authorized to perform this action.', 403)
     );
   }
-  const user = await UserModel.findById(req.params.id);
+  const user = await User.findById(req.params.id);
 
   if (!user) {
     return next(new AppError('User Not Found.', 404));
@@ -165,6 +170,9 @@ exports.updatePassword = catchAsyncError(async (req, res, next) => {
   });
 });
 
+
+// Authentication and Authorization (Protect, RestrictTo)
+
 exports.protect = catchAsyncError(async (req, res, next) => {
   if (!req.cookies.jwt) {
     return next(
@@ -179,7 +187,7 @@ exports.protect = catchAsyncError(async (req, res, next) => {
     );
   }
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  const currentUser = await UserModel.findById(decoded.id);
+  const currentUser = await User.findById(decoded.id);
 
   if (!currentUser) {
     return next(new AppError('User no longer exists.', 401));

@@ -3,7 +3,9 @@ const {
   getReviewsOfTour,
   createReview,
   setIds,
-  getReview
+  getReview,
+  updateReview,
+  deleteReview
 } = require('./../Controllers/reviewController');
 
 const {protect, restrictTo} = require("./../Controllers/authController")
@@ -11,6 +13,8 @@ const {protect, restrictTo} = require("./../Controllers/authController")
 
 const router = Router({mergeParams: true});
 
-router.route('/').get(getReviewsOfTour).post(protect, restrictTo('user'), setIds, createReview);
-router.route("/:id").get(getReview)
+router.use(protect);
+
+router.route('/').get(getReviewsOfTour).post(restrictTo('user'), setIds, createReview);
+router.route("/:id").get(getReview).patch(restrictTo('user', 'admin'), updateReview).delete(restrictTo('user', 'admin'), deleteReview);
 module.exports = router;
