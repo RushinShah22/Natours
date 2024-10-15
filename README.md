@@ -9,7 +9,6 @@ Welcome to the Natours project! This repository contains the source code for a f
 - [Setup](#setup)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Contributing](#contributing)
 
 ## Features
 
@@ -18,7 +17,6 @@ Welcome to the Natours project! This repository contains the source code for a f
 - Booking management
 - Tour management (CRUD operations)
 - User reviews and ratings for tours
-- Responsive design
 - API documentation
 
 ## Technologies
@@ -26,10 +24,7 @@ Welcome to the Natours project! This repository contains the source code for a f
 - Node.js
 - Express.js
 - MongoDB & Mongoose
-- Pug (template engine)
-- HTML5, CSS3, and JavaScript
-- Mapbox (for displaying tour locations)
-- Stripe (for payment processing)
+- JavaScript
 - Git
 
 ## Setup
@@ -73,20 +68,19 @@ DATABASE_PASSWORD=<your_database_password>
 JWT_SECRET=<your_jwt_secret>
 ```
 ## Database Setup
-Ensure that your MongoDB instance is running and accessible. You can create a free MongoDB cluster using MongoDB Atlas.
+Ensure that your MongoDB instance is running and accessible.
 
 Running the Application
 Start the development server:
 
 ```sh
-npm start
+use docker to run a container.
 ```
 Open your browser and visit:
 
 http://localhost:3000
 
 ## Usage
-Visit the home page to view available tours.
 Sign up and log in to book a tour.
 Manage your bookings and reviews through your user account.
 ## Project Structure
@@ -104,11 +98,4 @@ natours/
 └── README.md          # Project documentation
 
 ```
-## Contributing
-Contributions are welcome! If you have any suggestions or improvements, please create a pull request or open an issue.
 
-Fork the Project
-Create your Feature Branch (git checkout -b feature/AmazingFeature)
-Commit your Changes (git commit -m 'Add some AmazingFeature')
-Push to the Branch (git push origin feature/AmazingFeature)
-Open a Pull Request
